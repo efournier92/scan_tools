@@ -1,5 +1,7 @@
 #!/bin/bash
 
+source ./utils/time.bash
+
 document_mode_name() {
   echo "capture"
 }
@@ -64,10 +66,10 @@ temp_tiff_dir_name() {
 }
 
 default_photo_file_name() {
-  echo "`time_now`.jpeg"
+  echo "`get_time_now`.jpeg"
 }
 
 default_document_file_name() {
-  echo "`time_now`.pdf"
+  echo "`get_time_now`.pdf"
 }
 

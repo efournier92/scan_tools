@@ -7,8 +7,10 @@
 # Dependencies  : 
 #----------------
 
+source ./messages/help.bash
 source ./args/mode_args.bash
 source ./args/verbose_args.bash
+source ./args/preview_args.bash
 source ./args/help_args.bash
 source ./args/photo_args.bash
 source ./args/document_args.bash
@@ -37,7 +39,7 @@ main() {
   elif [[ "$mode" == `document_mode_name` ]]; then
     run_document_mode "$@"
   else
-    `print_help_by_mode`
+    show_help "$mode"
   fi
 }
 

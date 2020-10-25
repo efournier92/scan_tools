@@ -7,9 +7,8 @@
 
 help_header() {
 cat << EOF
-----
-VHSD | VHS Digitizer
-----
+----------
+SCAN TOOLS
 EOF
 }
 
@@ -23,170 +22,76 @@ GENERAL
   -m, --mode           enable mode [capture|cut|batch|join]
 
   -v, --verbose        enable verbose debugging info
+
+  -p, --preview        enable preview after scan
   
-  USAGE: vhsd -m capture -h -v
+  USAGE: scan_tools -m capture -h -v -p
 
 EOF
 }
 
-help_capture() {
+help_photo() {
 cat << EOF
-_______
-CAPTURE
+_____
+PHOTO
 
-  -i, --input,         input video devide
-  --video_device
+  -i, --scanner        scanner device for input
 
-  -a, --audio_device   input audio device
+  -f, --format         format for scan
 
-  -c, --codec          output video codec
-
-  -t, --stop_time      maximum capture duration
+  -q, --quality        scan qualiter [150, 300, 600]
 
   -d, --output_dir     directory in which to save the capture
 
-  -o, --output_name    name for the capture file
+  -o, --output_name    name for the scanned file
 
-  --video_format       output video format []
-
-  --audio_format       output audio format []
-
-  --crf                output constant rate factor
-
-  --preset             preset for capture process []
-
-  --size               input video size
-
-  --standard           input stream standard [ntsc,pal,...]
-
-  --threads            maximum threads for process
-
-  --tune               tuning for capture output [film,...]
-
-  USAGE: vhsd -m capture -i /dev/video0 -a hw:2,0 -d . -o captured.bash
+  USAGE: scan_tools -m photo -i scanner -q 600 -f jpeg -d . -o scan
 
 EOF
 }
 
-help_cut() {
+help_document() {
 cat << EOF
-___
-CUT
+________
+DOCUMENT
 
-  -i, --input_file     input video for cutting
+  -i, --scanner        scanner device for input
 
-  -d, --output_dir     directory in which to save the cut file
+  -q, --quality        scan qualiter [150, 300, 600]
 
-  -o, --output_name    name for the cut file
+  -d, --output_dir     directory in which to save the capture
+
+  -o, --output_name    name for the scanned file
   
-  --crf                constant rate factor for encoding cut file
-
-  --crop               crop to apply in cut file
-
-  --dimensions         dimensions of the output cut file
-
-  --preset             preset for the encoding process
-
-  --queue_size         max queue size for encoding process
-
-  --tune               video tuning for the output file [film,...]
-  
-  USAGE: vhsd -m cut -i file.mp4 -d . -o cut.mp4
+  USAGE: scan_tools -m document -i scanner -q 300 -d . -o scan
 
 EOF
 }
 
-help_batch() {
-cat << EOF
-_____
-BATCH
-
-  -i, --input,         
-  --batch_file         batch text file created from cut mode
-  
-  USAGE: vhsd -m batch -i ~/.vhsd/batch.txt
-
-EOF
-}
-
-help_join() {
-cat << EOF
-____
-JOIN
-
-  -i, --input,         batch text file created in cut mode
-
-
-  -d, --output_dir     directory in which to save the joined file
-
-  -o, --output_name    name for the joined file
-
-  USAGE: vhsd -m join -i file.mp4 -d . -o out_file.mp4
-
-EOF
-}
-
-help_watch() {
-cat << EOF
-_____
-WATCH
-
-  -i, --input,         input video devide
-  --video_device
-
-  USAGE: vhsd -m watch -i /dev/video0
-
-EOF
-}
-
-print_help_capture() {
+print_help_photo() {
   help_header
-  help_capture
+  help_photo
 }
 
-print_help_cut() {
+print_help_document() {
   help_header
-  help_cut
-}
-
-print_help_batch() {
-  help_header
-  help_batch
-}
-
-print_help_join() {
-  help_header
-  help_join
-}
-
-print_help_watch() {
-  help_header
-  help_watch
+  help_document
 }
 
 print_help_all() {
   help_header
   help_general
-  help_capture
-  help_cut
-  help_batch
-  help_join
-  help_watch
+  help_photo
+  help_document
 }
 
 print_help_by_mode() {
   local mode="$1"
   
-  if [[ "$mode" == `capture_mode_name` ]]; then
-    print_help_capture
-  elif [[ "$mode" == `cut_mode_name` ]]; then
-    print_help_cut
-  elif [[ "$mode" == `batch_mode_name` ]]; then
-    print_help_batch
-  elif [[ "$mode" == `join_mode_name` ]]; then
-    print_help_join
-  elif [[ "$mode" == `watch_mode_name` ]]; then
-    print_help_watch
+  if [[ "$mode" == `photo_mode_name` ]]; then
+    print_help_photo
+  elif [[ "$mode" == `document_mode_name` ]]; then
+    print_help_document
   else
     print_help_all
   fi

@@ -5,10 +5,10 @@
 # Description   : Interprets command arguments for document mode
 #----------------
 
-source ./input/selection/select_device.bash
-source ./constants/defaults.bash
-source ./utilities/fs.bash
-source ./utilities/time.bash
+source ./input/user_select.bash
+source ./utils/constants.bash
+source ./utils/fs.bash
+source ./utils/time.bash
 source ./messages/logs.bash
 source ./messages/errors.bash
 

@@ -9,13 +9,12 @@
 # Example Usage : 
 #----------------
 
-source ./utils/printer.bash
-source ./constants/constants.bash
+source ./utils/constants.bash
 
 user_select_scanner() {
   scanner="$1"
 
-  printf "$(print_header 'SELECT SCANNER')" >&2
+  #printf "$(print_header 'SELECT SCANNER')" >&2
   select selected_scanner in `scanimage -f "%d %n"`; do
     scanner="$selected_scanner"
     break

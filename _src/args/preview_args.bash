@@ -7,7 +7,7 @@
 
 source ./messages/logs.bash
 source ./messages/errors.bash
-source ./utilities/modes.bash
+source ./utils/modes.bash
 
 read_preview_args() {
   [[ "$VERBOSE" = true ]] && log_arguments "${FUNCNAME[0]}" "$@"

@@ -5,7 +5,7 @@
 # Description   : Utility functions for mode detection
 #----------------
 
-source ./constants/defaults.bash
+source ./utils/constants.bash
 source ./messages/errors.bash
 
 is_mode_known() {
