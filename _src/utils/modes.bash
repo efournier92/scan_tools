@@ -13,8 +13,7 @@ is_mode_known() {
 
   [[ -z "$selected_mode" ]] && error_missing_function_args "${FUNCNAME[0]}" "$@"
 
-
-  local known_modes=(`photo_mode_name` `document_mode_name`)
+  local known_modes=(`photo_mode_name` `doc_mode_name` `crop_mode_name`)
   
   local is_known=false
   for mode in "${known_modes[@]}"; do

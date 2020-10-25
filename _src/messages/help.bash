@@ -50,10 +50,10 @@ PHOTO
 EOF
 }
 
-help_document() {
+help_doc() {
 cat << EOF
-________
-DOCUMENT
+___
+DOC
 
   -i, --scanner        scanner device for input
 
@@ -63,7 +63,19 @@ DOCUMENT
 
   -o, --output_name    name for the scanned file
   
-  USAGE: scan_tools -m document -i scanner -q 300 -d . -o scan
+  USAGE: scan_tools -m doc -i scanner -q 300 -d . -o scan
+
+EOF
+}
+
+help_crop() {
+cat << EOF
+____
+CROP
+
+  -i, --input_dir        scanner device for input
+
+  USAGE: scan_tools -m crop -i input_dir
 
 EOF
 }
@@ -73,16 +85,22 @@ print_help_photo() {
   help_photo
 }
 
-print_help_document() {
+print_help_doc() {
   help_header
-  help_document
+  help_doc
+}
+
+print_help_crop() {
+  help_header
+  help_crop
 }
 
 print_help_all() {
   help_header
   help_general
   help_photo
-  help_document
+  help_doc
+  help_crop
 }
 
 print_help_by_mode() {
@@ -90,8 +108,10 @@ print_help_by_mode() {
   
   if [[ "$mode" == `photo_mode_name` ]]; then
     print_help_photo
-  elif [[ "$mode" == `document_mode_name` ]]; then
-    print_help_document
+  elif [[ "$mode" == `doc_mode_name` ]]; then
+    print_help_doc
+  elif [[ "$mode" == `crop_mode_name` ]]; then
+    print_help_crop
   else
     print_help_all
   fi

@@ -2,12 +2,12 @@
 
 source ./utils/time.bash
 
-document_mode_name() {
-  echo "capture"
+doc_mode_name() {
+  echo "doc"
 }
 
 photo_mode_name() {
-  echo "capture"
+  echo "photo"
 }
 
 default_photo_format() {
@@ -18,10 +18,9 @@ default_photo_quality() {
   echo "600"
 }
 
-default_document_quality() {
+default_doc_quality() {
   echo "300"
 }
-
 
 selectable_formats() {
   echo "pdf jpeg"
@@ -39,37 +38,19 @@ photo_formats() {
   echo "jpeg"
 }
 
-document_mode_name() {
-  echo "document"
+doc_mode_name() {
+  echo "doc"
 }
 
-document_formats() { 
+doc_formats() { 
   echo "pdf" 
 }
 
-message_image_mode_not_detected() {
-  echo "ERROR: Image mode not detected. Exiting."
+crop_jpeg_dir() {
+  echo "_JPEGs"
 }
 
-message_scanner_not_supplied() {
-  echo "ERROR: Scanner was not supplied. Exiting."
-}
-
-# fs
-
-default_output_dir() {
-  echo "$(pwd)"
-}
-
-temp_tiff_dir_name() {
-  echo "_temp_tiff"
-}
-
-default_photo_file_name() {
-  echo "`get_time_now`.jpeg"
-}
-
-default_document_file_name() {
-  echo "`get_time_now`.pdf"
+crop_pdf_dir() {
+  echo "_PDFs"
 }
 

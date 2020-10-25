@@ -8,21 +8,26 @@
 #----------------
 
 source ./messages/help.bash
+source ./utils/constants.bash
 source ./args/mode_args.bash
 source ./args/verbose_args.bash
 source ./args/preview_args.bash
 source ./args/help_args.bash
 source ./args/photo_args.bash
-source ./args/document_args.bash
+source ./args/doc_args.bash
 source ./modes/photo_mode.bash
-source ./modes/document_mode.bash
+source ./modes/doc_mode.bash
 
 run_photo_mode() {
   photo_mode `read_photo_args "$@"`
 }
 
-run_document_mode() {
-  document_mode `read_document_args "$@"`
+run_doc_mode() {
+  doc_mode `read_doc_args "$@"`
+}
+
+run_crop_mode() {
+  crop_mode `read_crop_args "$@"`
 }
 
 main() {
@@ -36,8 +41,10 @@ main() {
   read_help_args "$@"
   if [[ "$mode" == `photo_mode_name` ]]; then
     run_photo_mode "$@"
-  elif [[ "$mode" == `document_mode_name` ]]; then
-    run_document_mode "$@"
+  elif [[ "$mode" == `doc_mode_name` ]]; then
+    run_doc_mode "$@"
+  elif [[ "$mode" == `crop_mode_name` ]]; then
+    run_crop_mode "$@"
   else
     show_help "$mode"
   fi

@@ -1,45 +1,53 @@
-exit_with_error() {
-  local message="$1"
+#!/bin/bash
 
-  echo "${message}"
-  exit 1
+#----------------
+# Name          : 
+# Description   : 
+# Author        : E Fournier
+# Dependencies  : 
+# Arguments     : 
+# Example Usage : 
+#----------------
+
+source ./utils/time.bash
+
+default_output_dir() {
+  echo "$(pwd)"
 }
 
-missing_arguments_error() {
-  local function_name="$1"
+temp_tiff_dir_name() {
+  echo "_temp_tiff"
+}
 
-  echo "ERROR: Required argument(s) missing from ${function_name}"
+default_photo_file_name() {
+  echo "`get_time_now`.jpeg"
+}
+
+default_doc_file_name() {
+  echo "`get_time_now`.pdf"
 }
 
 get_temp_tiff_dir() {
   local output_name="$1"
   
-  [[ -z "${output_name}" ]] && exit_with_error "`missing_arguments_error get_temp_tiff_dir`"
-
-  echo "scan_${output_name}"
+  echo "scan_$output_name"
 }
 
 get_temp_tiff_concat_file() {
   local temp_sequence_name="$1"
   
-  [[ -z "${temp_sequence_name}" ]] && exit 1
-
-  echo "${temp_tiff_dir}/out_concat"
+  echo "$temp_tiff_dir/out_concat"
 }
 
 get_temp_tiff_sequence(){
   local output_name="$1"
   
-  [[ -z "${output_name}" ]] && exit 1
-
-  echo "${output_name}%d.tif"
+  echo "$output_name%d.tif"
 }
 
 get_output_pdf_file(){
   local output_name="$1"
   
-  [[ -z "${output_name}" ]] && exit 1
-
-  echo "${output_pdf}.pdf"
+  echo "$output_name.pdf"
 }
   
