@@ -1,16 +1,26 @@
+#!/bin/bash
 
-source ./constants/constants.bash
+#----------------
+# Name          : modes.bash
+# Description   : Utility functions for mode detection
+#----------------
 
-## Image Mode
-detect_image_mode() {
-  scan_format="$1"
+source ./constants/defaults.bash
+source ./messages/errors.bash
 
-  if [[ $scan_format == "jpeg" ]]; then
-    echo `photo_mode_name`
-  elif [[ $scan_format == "pdf" ]]; then
-    echo `document_mode_name`
-  else
-    echo `message_image_mode_not_detected`
-  fi
+is_mode_known() {
+  local selected_mode="$1"
+
+  [[ -z "$selected_mode" ]] && error_missing_function_args "${FUNCNAME[0]}" "$@"
+
+
+  local known_modes=(`photo_mode_name` `document_mode_name`)
+  
+  local is_known=false
+  for mode in "${known_modes[@]}"; do
+    [[ "$selected_mode" == "$mode" ]] && is_known=true
+  done
+  
+  echo "$is_known"
 }
 
