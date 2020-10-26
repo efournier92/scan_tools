@@ -23,7 +23,7 @@ photo_mode() {
   local quality="$3"
   local output_dir="$4"
   local output_name="$5"
-  local output_location="$output_dir/$output_name"
+  local output_location="$output_dir/$output_name.jpeg"
 
   [[ -z "$scanner" || -z "$format" || -z "$quality" || -z "$output_dir" || -z "$output_name" ]] && error_missing_function_args "${FUNCNAME[0]}" "$@"
   

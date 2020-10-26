@@ -10,6 +10,10 @@ photo_mode_name() {
   echo "photo"
 }
 
+crop_mode_name() {
+  echo "crop"
+}
+
 default_photo_format() {
   echo "jpeg"
 }
@@ -28,22 +32,6 @@ selectable_formats() {
 
 selectable_qualities() {
   echo "600 300 150 75"
-}
-
-photo_mode_name() {
-  echo "photo"
-}
-
-photo_formats() {
-  echo "jpeg"
-}
-
-doc_mode_name() {
-  echo "doc"
-}
-
-doc_formats() { 
-  echo "pdf" 
 }
 
 crop_jpeg_dir() {

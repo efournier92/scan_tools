@@ -45,7 +45,7 @@ read_photo_args() {
   [[ -z "$format" ]] && local format=`default_photo_format`
   [[ -z "$quality" ]] && local quality=`default_photo_quality`
   [[ -z "$output_dir" ]] && local output_dir=`default_output_dir`
-  [[ -z "$output_name" ]] && local output_name=`default_photo_file_name`
+  [[ -z "$output_name" ]] && local output_name=`default_file_name`
   
   echo "$scanner" "$format" "$quality" "$output_dir" "$output_name"
 }

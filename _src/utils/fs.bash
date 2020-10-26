@@ -15,39 +15,39 @@ default_output_dir() {
   echo "$(pwd)"
 }
 
-temp_tiff_dir_name() {
-  echo "_temp_tiff"
+config_dir() {
+  echo "$HOME/.scanz"
 }
 
-default_photo_file_name() {
-  echo "`get_time_now`.jpeg"
+default_file_name() {
+  echo "`get_time_now`"
 }
 
-default_doc_file_name() {
-  echo "`get_time_now`.pdf"
+tiff_dir_name() {
+  echo "_TIFs"
 }
 
-get_temp_tiff_dir() {
+get_tiff_sequence_pattern() {
   local output_name="$1"
   
-  echo "scan_$output_name"
+  echo "$output_name_%d.tif"
 }
 
-get_temp_tiff_concat_file() {
-  local temp_sequence_name="$1"
-  
-  echo "$temp_tiff_dir/out_concat"
-}
-
-get_temp_tiff_sequence(){
+get_tiff_concat_file() {
   local output_name="$1"
   
-  echo "$output_name%d.tif"
+  echo "_concat_$output_name.tif"
 }
 
-get_output_pdf_file(){
+get_pdf_concat_file() {
+  local output_name="$1"
+  
+  echo "_concat_$output_name.pdf"
+}
+
+get_pdf_final_file() {
   local output_name="$1"
   
   echo "$output_name.pdf"
 }
-  
+

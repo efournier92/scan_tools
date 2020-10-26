@@ -44,7 +44,7 @@ read_doc_args() {
   [[ -z "$scanner" ]] && local scanner=`user_select_scanner`
   [[ -z "$quality" ]] && local quality=`default_doc_quality`
   [[ -z "$output_dir" ]] && local output_dir=`default_output_dir`
-  [[ -z "$output_name" ]] && local output_name=`default_doc_file_name`
+  [[ -z "$output_name" ]] && local output_name=`default_file_name`
 
   echo "$scanner" "$quality" "$output_dir" "$output_name"
 }

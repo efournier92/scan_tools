@@ -10,113 +10,114 @@
 #----------------
 
 source ./utils/constants.bash
+source ./utils/fs.bash
 source ./messages/logs.bash
 source ./messages/errors.bash
 
-get_temp_tiff_dir_location() {
+get_create_tiff_dir_command() {
   [[ "$VERBOSE" = true ]] && log_arguments "${FUNCNAME[0]}" "$@"
-  local output_dir="$1"
+  local tiff_dir="$1"
 
-  [[ -z "$output_dir" ]] && error_missing_function_args "${FUNCNAME[0]}" "$@"
+  [[ -z "$tiff_dir" ]] && error_missing_function_args "${FUNCNAME[0]}" "$@"
 
-  echo "$output_dir/`temp_tiff_dir_name`"
-}
-
-get_create_temp_dir_command() {
-  [[ "$VERBOSE" = true ]] && log_arguments "${FUNCNAME[0]}" "$@"
-  local temp_dir_location="$1"
-
-  [[ -z "$temp_dir_location" ]] && error_missing_function_args "${FUNCNAME[0]}" "$@"
-
-  mkdir -p "$temp_dir_location"
+  echo "mkdir -p $tiff_dir"
 }
 
 get_scan_command() {
   [[ "$VERBOSE" = true ]] && log_arguments "${FUNCNAME[0]}" "$@"
   local scanner="$1"
   local quality="$2"
-  local temp_tiff_sequence_location="$3"
+  local tiff_dir="$3"
+  local tiff_sequence_pattern="$4"
 
-  [[ -z "$scanner" || -z "$quality" || -z "$temp_tiff_sequence_location" ]] && error_missing_function_args "${FUNCNAME[0]}" "$@"
+  [[ -z "$scanner" || -z "$quality" || -z "$tiff_dir" || -z "$tiff_sequence_pattern" ]] && error_missing_function_args "${FUNCNAME[0]}" "$@"
 
-  echo "scanimage -d $scanner --batch=$temp_tiff_dir/$tmp_tif_sequence" --batch-prompt --progress --format=tiff --resolution "$quality"
+  echo "scanimage -d $scanner --batch=$tiff_dir/$tiff_sequence_pattern" --batch-prompt --progress --format=tiff --resolution "$quality"
 }
 
 get_merge_tif_files_command() {
   [[ "$VERBOSE" = true ]] && log_arguments "${FUNCNAME[0]}" "$@"
-  local temp_tiff_sequence_location="$1"
-  local temp_tiff_concat_file="$2"
+  local tiff_dir="$1"
+  local tiff_concat_file="$2"
 
-  [[ -z "$temp_tiff_sequence_location" || -z "$temp_tiff_concat_file" ]] && error_missing_function_args "${FUNCNAME[0]}" "$@"
+  [[ -z "$tiff_dir" || -z "$tiff_concat_file" ]] && error_missing_function_args "${FUNCNAME[0]}" "$@"
 
-  echo "tiffcp $temp_tiff_sequence_location/*.tif $temp_tiff_concat_file"
+  echo "tiffcp $tiff_dir/*.tif $tiff_dir/$tiff_concat_file"
 }
 
-get_convert_tiff_concat_to_pdf_command() {
+get_convert_tiff_to_pdf_command() {
   [[ "$VERBOSE" = true ]] && log_arguments "${FUNCNAME[0]}" "$@"
-  local temp_tiff_concat_file="$1"
+  local tiff_dir="$1"
+  local tiff_concat_file="$2"
+  local pdf_concat_file="$3"
 
-  [[ -z "$temp_tiff_concat_file" ]] && error_missing_function_args "${FUNCNAME[0]}" "$@"
+  [[ -z "$tiff_dir" || -z "$tiff_concat_file" || -z "$pdf_concat_file" ]] && error_missing_function_args "${FUNCNAME[0]}" "$@"
 
-  echo "tiff2pdf -o $temp_tiff_concat_file.pdf $temp_tiff_concat_file.tif"
+  echo "tiff2pdf -o $tiff_dir/$pdf_concat_file $tiff_dir/$tiff_concat_file"
 }
 
-get_standardize_pdf_command() {
+get_shrink_pdf_command() {
   [[ "$VERBOSE" = true ]] && log_arguments "${FUNCNAME[0]}" "$@"
-  local temp_tiff_concat_file="$1"
-  local output_pdf_file="$2"
+  local tiff_dir="$1"
+  local tiff_concat_file="$2"
+  local output_dir="$3"
+  local pdf_concat_file="$4"
+  local pdf_final_file="$5"
 
-  [[ -z "$temp_tiff_concat_file" || -z "$output_pdf_file" ]] && error_missing_function_args "${FUNCNAME[0]}" "$@"
+  [[ -z "$tiff_dir" || -z "$tiff_concat_file" || -z $output_dir || -z "$pdf_concat_file" || -z "$pdf_final_file" ]] && error_missing_function_args "${FUNCNAME[0]}" "$@"
 
-  echo "ps2pdf $temp_tiff_concat_file.pdf $output_pdf_file"
-}
-
-get_show_doc_preview_command() {
-  [[ "$VERBOSE" = true ]] && log_arguments "${FUNCNAME[0]}" "$@"
-  local output_pdf_file="$1"
-
-  [[ -z "$output_pdf_file" ]] && error_missing_function_args "${FUNCNAME[0]}" "$@"
-
-  echo "evince $output_pdf_file"
-}
-
-get_remove_temp_dir_command() {
-  [[ "$VERBOSE" = true ]] && log_arguments "${FUNCNAME[0]}" "$@"
-  local temp_dir_location="$1"
-
-  [[ -z "$temp_dir_location" ]] && error_missing_function_args "${FUNCNAME[0]}" "$@"
-
-  echo rm -r "$temp_tiff_dir"
+  echo "ps2pdf $tiff_dir/$pdf_concat_file $output_dir/$pdf_final_file"
 }
 
 scan_to_tiff() {
   [[ "$VERBOSE" = true ]] && log_arguments "${FUNCNAME[0]}" "$@"
-  local temp_dir_location="$1"
-  local scanner="$2"
-  local quality="$3"
-  local temp_tiff_sequence_location="$4"
+  local scanner="$1"
+  local quality="$2"
+  local tiff_dir="$3"
+  local tiff_sequence_pattern="$4"
 
-  eval `get_create_temp_dir_command "$temp_dir_location"`
-  eval `get_scan_command "$scanner" "$quality" "$temp_tiff_sequence_location"`
+  eval `get_create_tiff_dir_command "$tiff_dir"`
+  eval `get_scan_command "$scanner" "$quality" "$tiff_dir" "$tiff_sequence_pattern"`
 }
 
 print_final_pdf() {
   [[ "$VERBOSE" = true ]] && log_arguments "${FUNCNAME[0]}" "$@"
-  local temp_tiff_sequence_location="$1"
-  local temp_tiff_concat_file="$2"
-  local output_pdf_file="$3"
-  local temp_dir_location="$4"
+  local tiff_dir="$1"
+  local tiff_concat_file="$2"
+  local output_dir="$3"
+  local pdf_concat_file="$4"
+  local pdf_final_file="$5"
 
-  eval `get_merge_tif_files_command "$temp_tiff_sequence_location" "$temp_tiff_concat_file"`
-  eval `get_convert_tiff_concat_to_pdf_command "$temp_tiff_concat_file"`
-  eval `get_standardize_pdf_command "$temp_tiff_concat_file" "$output_pdf_file"`
-  eval `get_remove_temp_dir_command "$temp_dir_location"`
+  eval `get_merge_tif_files_command "$tiff_dir" "$tiff_concat_file"`
+  eval `get_convert_tiff_to_pdf_command "$tiff_dir" "$tiff_concat_file" "$pdf_concat_file"`
+  eval `get_shrink_pdf_command "$tiff_dir" "$tiff_concat_file" "$output_dir" "$pdf_concat_file" "$pdf_final_file"`
+}
+
+get_show_doc_preview_command() {
+  [[ "$VERBOSE" = true ]] && log_arguments "${FUNCNAME[0]}" "$@"
+  local output_dir="$1"
+  local pdf_final_file="$2"
+
+  [[ -z "$pdf_final_file" ]] && error_missing_function_args "${FUNCNAME[0]}" "$@"
+
+  echo "evince $output_dir/$pdf_final_file"
 }
 
 try_preview_scanned_output() {
-  local output_pdf_file="$1"
+  [[ "$VERBOSE" = true ]] && log_arguments "${FUNCNAME[0]}" "$@"
+  local output_dir="$1"
+  local pdf_final_file="$2"
 
-  [[ "$PREVIEW" == "true" ]] && eval `get_show_doc_preview_command "$output_pdf_file"`
+  [[ "$PREVIEW" == "true" ]] && eval `get_show_doc_preview_command "$output_dir" "$pdf_final_file"`
+}
+
+get_cleanup_tiff_dir_command() {
+  [[ "$VERBOSE" = true ]] && log_arguments "${FUNCNAME[0]}" "$@"
+  local tiff_dir="$1"
+
+  [[ -z "$tiff_dir" ]] && error_missing_function_args "${FUNCNAME[0]}" "$@"
+
+  echo "rm -r $tiff_dir"
 }
 
 doc_mode() {
@@ -128,15 +129,18 @@ doc_mode() {
 
   [[ -z "$scanner" || -z "$quality" || -z "$output_dir" || -z "$output_name" ]] && error_missing_function_args "${FUNCNAME[0]}" "$@"
 
-  local temp_dir_location=`get_temp_tiff_dir_location "$output_dir"`
-  local temp_tiff_sequence_location="$temp_dir_location/`temp_tiff_dir_name`"
-  local temp_tiff_concat_file="$temp_tiff_dir/out_concat"
-  local output_pdf_file="$output_name.pdf"
+  local tiff_dir="`config_dir`/`tiff_dir_name`/$output_name"
+  local tiff_sequence_pattern=`get_tiff_sequence_pattern "$output_name"`
+  local tiff_concat_file=`get_tiff_concat_file "$output_name"`
+  local pdf_concat_file=`get_pdf_concat_file "$output_name"`
+  local pdf_final_file=`get_pdf_final_file "$output_name"`
 
-  scan_to_tiff "$temp_dir_location" "$scanner" "$quality" "$temp_tiff_sequence_location"
+  scan_to_tiff "$scanner" "$quality" "$tiff_dir" "$tiff_sequence_pattern"
 
-  print_final_pdf "$temp_tiff_sequence_location" "$temp_tiff_concat_file" "$output_pdf_file" "$temp_dir_location"
-  
-  try_preview_scanned_output "$output_pdf_file"
+  print_final_pdf "$tiff_dir" "$tiff_concat_file" "$output_dir" "$pdf_concat_file" "$pdf_final_file"
+
+  try_preview_scanned_output "$output_dir" "$pdf_final_file"
+
+  eval `get_cleanup_tiff_dir_command "$tiff_dir"`
 }
 
