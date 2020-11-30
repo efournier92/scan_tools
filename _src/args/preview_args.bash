@@ -5,14 +5,16 @@
 # Description   : 
 #----------------
 
-source ./messages/logs.bash
-source ./messages/errors.bash
-source ./utils/modes.bash
+source "./messages/logs.bash"
+source "./messages/errors.bash"
+source "./utils/modes.bash"
 
 read_preview_args() {
   [[ "$VERBOSE" = true ]] && log_arguments "${FUNCNAME[0]}" "$@"
+
   while [ "$1" != "" ]; do
     case $1 in
+
       -p | --preview )
         local is_preview_enabled="true"
         ;;

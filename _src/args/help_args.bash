@@ -5,14 +5,16 @@
 # Description   : Reads command arguments requesting help info
 #----------------
 
-source ./messages/logs.bash
-source ./messages/errors.bash
-source ./messages/help.bash
+source "./messages/logs.bash"
+source "./messages/errors.bash"
+source "./messages/help.bash"
 
 read_help_args() {
   [[ "$VERBOSE" = true ]] && log_arguments "${FUNCNAME[0]}" "$@"
+
   while [ "$1" != "" ]; do
     case $1 in
+
       -h | --help )
         local should_show_help=true
         ;;

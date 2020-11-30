@@ -18,6 +18,7 @@ is_mode_known() {
     `doc_mode_name` \
     `crop_mode_name` \
     `split_doc_mode_name` \
+    `join_doc_mode_name` \
   )
   
   local is_known=false

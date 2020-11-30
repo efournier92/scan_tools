@@ -18,6 +18,10 @@ split_doc_mode_name() {
   echo "split_doc"
 }
 
+join_doc_mode_name() {
+  echo "join_doc"
+}
+
 color_mode_color() {
   echo "Color"
 }

@@ -5,13 +5,15 @@
 # Description   : Interprets command arguments for photo mode
 #----------------
 
-source ./input/user_select.bash
+source "./input/user_select.bash"
 
 read_photo_args() {
   [[ "$VERBOSE" = true ]] && log_arguments "${FUNCNAME[0]}" "$@"
   local i=0
+
   while [ "$1" != "" ]; do
     case $1 in
+
       -i | --scanner )
         shift
         local scanner="$1"

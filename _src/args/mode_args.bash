@@ -5,14 +5,16 @@
 # Description   : Interprets general command arguments
 #----------------
 
-source ./messages/logs.bash
-source ./messages/errors.bash
-source ./utils/modes.bash
+source "./messages/logs.bash"
+source "./messages/errors.bash"
+source "./utils/modes.bash"
 
 read_mode_args() {
   [[ "$VERBOSE" = true ]] && log_arguments "${FUNCNAME[0]}" "$@"
+
   while [ "$1" != "" ]; do
     case $1 in
+
       -m | --mode )
         shift
         local mode="$1"

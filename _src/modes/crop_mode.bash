@@ -53,9 +53,9 @@ crop_all_jpegs() {
 
     [[ -f "$pdf_name" ]] && continue
     
-    doc_file_names=`crop_jpegs_in_pdf_dir`
+    local doc_file_names=`crop_jpegs_in_pdf_dir`
 
-    print_cropped_pdf "$file_names" "$pdf_name"
+    print_cropped_pdf "$doc_file_names" "$pdf_name"
   done
 }
 

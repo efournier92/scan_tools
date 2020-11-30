@@ -5,18 +5,20 @@
 # Description   : Interprets command arguments for doc mode
 #----------------
 
-source ./input/user_select.bash
-source ./utils/constants.bash
-source ./utils/fs.bash
-source ./utils/time.bash
-source ./messages/logs.bash
-source ./messages/errors.bash
+source "./input/user_select.bash"
+source "./utils/constants.bash"
+source "./utils/fs.bash"
+source "./utils/time.bash"
+source "./messages/logs.bash"
+source "./messages/errors.bash"
 
 read_doc_args() {
   [[ "$VERBOSE" = true ]] && log_arguments "${FUNCNAME[0]}" "$@"
   local i=0
+
   while [ "$1" != "" ]; do
     case $1 in
+
       -i | --scanner )
         shift
         local scanner="$1"

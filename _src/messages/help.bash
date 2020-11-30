@@ -95,6 +95,19 @@ SPLIT DOC
 EOF
 }
 
+help_join_doc() {
+cat << EOF
+________
+JOIN DOC
+
+  -i, -d,
+  --jpeg_dir            scanner device for input
+
+  USAGE: scan_tools -m join_doc -i jpeg_dir
+
+EOF
+}
+
 print_help_photo() {
   help_header
   help_photo
@@ -115,6 +128,11 @@ print_help_split_doc() {
   help_split_doc
 }
 
+print_help_join_doc() {
+  help_header
+  help_join_doc
+}
+
 print_help_all() {
   help_header
   help_general
@@ -122,6 +140,7 @@ print_help_all() {
   help_doc
   help_crop
   help_split_doc
+  help_join_doc
 }
 
 print_help_by_mode() {
@@ -135,6 +154,8 @@ print_help_by_mode() {
     print_help_crop
   elif [[ "$mode" == `split_doc_mode_name` ]]; then
     print_help_split_doc
+  elif [[ "$mode" == `join_doc_mode_name` ]]; then
+    print_help_join_doc
   else
     print_help_all
   fi
