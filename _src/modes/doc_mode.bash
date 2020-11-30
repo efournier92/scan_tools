@@ -26,13 +26,14 @@ get_create_tiff_dir_command() {
 get_scan_command() {
   [[ "$VERBOSE" = true ]] && log_arguments "${FUNCNAME[0]}" "$@"
   local scanner="$1"
-  local quality="$2"
-  local tiff_dir="$3"
-  local tiff_sequence_pattern="$4"
+  local color_mode="$2"
+  local quality="$3"
+  local tiff_dir="$4"
+  local page_name="$5"
 
-  [[ -z "$scanner" || -z "$quality" || -z "$tiff_dir" || -z "$tiff_sequence_pattern" ]] && error_missing_function_args "${FUNCNAME[0]}" "$@"
+  [[ -z "$scanner" || -z "$quality" || -z "$tiff_dir" || -z "$page_name" ]] && error_missing_function_args "${FUNCNAME[0]}" "$@"
 
-  echo "scanimage -d $scanner --batch=$tiff_dir/$tiff_sequence_pattern" --batch-prompt --progress --format=tiff --resolution "$quality"
+  echo "scanimage -d $scanner --progress --format=tiff --mode $color_mode --resolution $quality -o $tiff_dir/$page_name"
 }
 
 get_merge_tif_files_command() {
@@ -69,15 +70,47 @@ get_shrink_pdf_command() {
   echo "ps2pdf $tiff_dir/$pdf_concat_file $output_dir/$pdf_final_file"
 }
 
+batch_scan_to_tiffs() {
+  local scanner="$1"
+  local color_mode="$2"
+  local quality="$3"
+  local tiff_dir="$4"
+  local page_name="$5"
+
+  local page_number=1
+  local should_continue="true"
+
+  until [[ "$should_continue" == "false" ]]; do
+    local page_name=`get_tiff_page_name "$page_number"`
+    eval `get_scan_command "$scanner" "$color_mode" "$quality" "$tiff_dir" "$page_name"`
+    echo "Scanned $tiff_dir/$page_name" >&2
+
+    eval `try_preview_scanned_file "$tiff_dir" "$page_name"`
+
+    read -p "Continue/Preview/Delete/Quit [c/p/d/q] >> " user_input
+    if [[ $user_input =~ "q" ]]; then
+      local should_continue="false"
+    elif [[ $user_input =~ "p" ]]; then
+      eval `get_delete_tiff_command "$tiff_dir" "$page_number"`
+      eval `get_show_doc_preview_command "$tiff_dir" "$scanned_file"`
+      local page_number=$((page_number + 1))
+    elif [[ $user_input =~ "d" ]]; then
+      eval `get_delete_tiff_command "$tiff_dir" "$page_number"`
+    else
+      local page_number=$((page_number + 1))
+    fi
+  done
+}
+
 scan_to_tiff() {
   [[ "$VERBOSE" = true ]] && log_arguments "${FUNCNAME[0]}" "$@"
   local scanner="$1"
-  local quality="$2"
-  local tiff_dir="$3"
-  local tiff_sequence_pattern="$4"
+  local color_mode="$2"
+  local quality="$3"
+  local tiff_dir="$4"
 
   eval `get_create_tiff_dir_command "$tiff_dir"`
-  eval `get_scan_command "$scanner" "$quality" "$tiff_dir" "$tiff_sequence_pattern"`
+  batch_scan_to_tiffs "$scanner" "$color_mode" "$quality" "$tiff_dir"
 }
 
 print_final_pdf() {
@@ -103,12 +136,12 @@ get_show_doc_preview_command() {
   echo "evince $output_dir/$pdf_final_file"
 }
 
-try_preview_scanned_output() {
+try_preview_scanned_file() {
   [[ "$VERBOSE" = true ]] && log_arguments "${FUNCNAME[0]}" "$@"
   local output_dir="$1"
-  local pdf_final_file="$2"
+  local scanned_file="$2"
 
-  [[ "$PREVIEW" == "true" ]] && eval `get_show_doc_preview_command "$output_dir" "$pdf_final_file"`
+  [[ "$PREVIEW" == "true" && -f "$output_dir/$scanned_file" ]] && eval `get_show_doc_preview_command "$output_dir" "$scanned_file"`
 }
 
 get_cleanup_tiff_dir_command() {
@@ -123,23 +156,23 @@ get_cleanup_tiff_dir_command() {
 doc_mode() {
   [[ "$VERBOSE" = true ]] && log_arguments "${FUNCNAME[0]}" "$@"
   local scanner="$1"
-  local quality="$2"
-  local output_dir="$3"
-  local output_name="$4"
+  local color_mode="$2"
+  local quality="$3"
+  local output_dir="$4"
+  local output_name="$5"
 
   [[ -z "$scanner" || -z "$quality" || -z "$output_dir" || -z "$output_name" ]] && error_missing_function_args "${FUNCNAME[0]}" "$@"
 
   local tiff_dir="`config_dir`/`tiff_dir_name`/$output_name"
-  local tiff_sequence_pattern=`get_tiff_sequence_pattern "$output_name"`
   local tiff_concat_file=`get_tiff_concat_file "$output_name"`
   local pdf_concat_file=`get_pdf_concat_file "$output_name"`
   local pdf_final_file=`get_pdf_final_file "$output_name"`
 
-  scan_to_tiff "$scanner" "$quality" "$tiff_dir" "$tiff_sequence_pattern"
+  scan_to_tiff "$scanner" "$color_mode" "$quality" "$tiff_dir"
 
   print_final_pdf "$tiff_dir" "$tiff_concat_file" "$output_dir" "$pdf_concat_file" "$pdf_final_file"
 
-  try_preview_scanned_output "$output_dir" "$pdf_final_file"
+  try_preview_scanned_file "$output_dir" "$pdf_final_file"
 
   eval `get_cleanup_tiff_dir_command "$tiff_dir"`
 }

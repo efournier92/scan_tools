@@ -14,6 +14,22 @@ crop_mode_name() {
   echo "crop"
 }
 
+split_doc_mode_name() {
+  echo "split_doc"
+}
+
+color_mode_color() {
+  echo "Color"
+}
+
+color_mode_bw() {
+  echo "Gray"
+}
+
+default_color_mode() {
+  echo `color_mode_color`
+}
+
 default_photo_format() {
   echo "jpeg"
 }

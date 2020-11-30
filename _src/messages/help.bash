@@ -7,8 +7,9 @@
 
 help_header() {
 cat << EOF
-----------
-SCAN TOOLS
+_____
+SCANZ
+
 EOF
 }
 
@@ -73,9 +74,23 @@ cat << EOF
 ____
 CROP
 
-  -i, --input_dir        scanner device for input
+  -i, --input_dir       scanner device for input
 
   USAGE: scan_tools -m crop -i input_dir
+
+EOF
+}
+
+help_split_doc() {
+cat << EOF
+_________
+SPLIT DOC
+
+  -i, --doc, --pdf      scanner device for input
+
+  -d, --jpeg_dir        scanner device for input
+
+  USAGE: scan_tools -m split_doc -i pdf_file -d jpeg_dir
 
 EOF
 }
@@ -95,12 +110,18 @@ print_help_crop() {
   help_crop
 }
 
+print_help_split_doc() {
+  help_header
+  help_split_doc
+}
+
 print_help_all() {
   help_header
   help_general
   help_photo
   help_doc
   help_crop
+  help_split_doc
 }
 
 print_help_by_mode() {
@@ -112,16 +133,10 @@ print_help_by_mode() {
     print_help_doc
   elif [[ "$mode" == `crop_mode_name` ]]; then
     print_help_crop
+  elif [[ "$mode" == `split_doc_mode_name` ]]; then
+    print_help_split_doc
   else
     print_help_all
   fi
-}
-
-show_help() {
-  local mode="$1"
-  
-  echo `print_help_by_mode "$mode"`
-
-  exit
 }
 

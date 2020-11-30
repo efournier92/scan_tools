@@ -23,3 +23,9 @@ user_select_scanner() {
   echo "$scanner"
 }
 
+user_select_pdf_file() {
+  read -p "PDF File: " pdf_file
+
+  echo "$pdf_file"
+}
+

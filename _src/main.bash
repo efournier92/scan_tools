@@ -15,8 +15,10 @@ source ./args/preview_args.bash
 source ./args/help_args.bash
 source ./args/photo_args.bash
 source ./args/doc_args.bash
+source ./args/split_doc_args.bash
 source ./modes/photo_mode.bash
 source ./modes/doc_mode.bash
+source ./modes/split_doc_mode.bash
 
 run_photo_mode() {
   photo_mode `read_photo_args "$@"`
@@ -28,6 +30,10 @@ run_doc_mode() {
 
 run_crop_mode() {
   crop_mode `read_crop_args "$@"`
+}
+
+run_split_doc_mode() {
+  split_doc_mode `read_split_doc_args "$@"`
 }
 
 main() {
@@ -45,8 +51,10 @@ main() {
     run_doc_mode "$@"
   elif [[ "$mode" == `crop_mode_name` ]]; then
     run_crop_mode "$@"
+  elif [[ "$mode" == `split_doc_mode_name` ]]; then
+    run_split_doc_mode "$@"
   else
-    show_help "$mode"
+    print_help_by_mode "$mode"
   fi
 }
 

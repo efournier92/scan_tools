@@ -27,10 +27,10 @@ tiff_dir_name() {
   echo "_TIFs"
 }
 
-get_tiff_sequence_pattern() {
-  local output_name="$1"
+get_tiff_page_name() {
+  local page_number="$1"
   
-  echo "$output_name_%d.tif"
+  echo "page_${page_number}.tif"
 }
 
 get_tiff_concat_file() {

@@ -21,9 +21,9 @@ read_preview_args() {
     shift
   done
  
-  [[ -z "$preview" ]] && local is_preview_enabled="false"
+  [[ -z "$is_preview_enabled" ]] && local is_preview_enabled="false"
 
-  echo "$preview"
+  echo "$is_preview_enabled"
 }
 
 

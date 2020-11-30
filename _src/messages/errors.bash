@@ -41,3 +41,9 @@ error_mode_not_found() {
   exit
 }
 
+error_pdf_file_not_found() {
+  echo "ERROR: PDF file not found [$@]"
+
+  exit
+}
+

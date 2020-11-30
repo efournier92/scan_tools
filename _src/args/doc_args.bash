@@ -37,15 +37,22 @@ read_doc_args() {
         local output_name="$1"
         ;;
 
+      -bw | --grayscale )
+        local bw_color_mode="true"
+        ;;
+
     esac
     shift
   done
-
+  
   [[ -z "$scanner" ]] && local scanner=`user_select_scanner`
   [[ -z "$quality" ]] && local quality=`default_doc_quality`
   [[ -z "$output_dir" ]] && local output_dir=`default_output_dir`
   [[ -z "$output_name" ]] && local output_name=`default_file_name`
+  [[ "$bw_color_mode" = "true" ]] \
+    && local color_mode=`color_mode_bw` \
+    || local color_mode=`color_mode_color`
 
-  echo "$scanner" "$quality" "$output_dir" "$output_name"
+  echo "$scanner" "$color_mode" "$quality" "$output_dir" "$output_name"
 }
 

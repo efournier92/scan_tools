@@ -34,7 +34,9 @@ crop_jpegs_in_pdf_dir() {
   done
 
   echo "$file_names"
-} print_cropped_pdf() {
+} 
+
+print_cropped_pdf() {
   local file_names="$1"
   local pdf_name="$2"
 

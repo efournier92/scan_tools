@@ -17,14 +17,13 @@ read_photo_args() {
         local scanner="$1"
         ;;
 
-      -f | --format )
-        shift
-        local format="$1"
-        ;;
-
       -q | --quality )
         shift
         local quality="$1"
+        ;;
+
+      -bw | --grayscale )
+        local bw_color_mode="true"
         ;;
 
       -d | --output_dir )
@@ -42,11 +41,13 @@ read_photo_args() {
   done
 
   [[ -z "$scanner" ]] && local scanner=`user_select_scanner`
-  [[ -z "$format" ]] && local format=`default_photo_format`
   [[ -z "$quality" ]] && local quality=`default_photo_quality`
   [[ -z "$output_dir" ]] && local output_dir=`default_output_dir`
   [[ -z "$output_name" ]] && local output_name=`default_file_name`
-  
-  echo "$scanner" "$format" "$quality" "$output_dir" "$output_name"
+  [[ "$bw_color_mode" = "true" ]] \
+    && local color_mode=`color_mode_bw` \
+    || local color_mode=`color_mode_color`
+
+  echo "$scanner" "$color_mode" "$quality" "$output_dir" "$output_name"
 }
 

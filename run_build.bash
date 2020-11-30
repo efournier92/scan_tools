@@ -2,7 +2,7 @@
 
 #----------------
 # Name          : run_build.bash
-# Description   : Runs the build process for vhsd, outputting a compiled binary to the build directory.
+# Description   : Runs the build process for scanz, outputting a compiled binary to the build directory.
 # Author        : E Fournier
 # Dependencies  : shc
 # Example Usage : bash run_build.bash
@@ -22,7 +22,7 @@ get_output_dir() {
 get_file_name() {
   local time_now=`date +"%y%m%d_%H%M"`
 
-  echo "vhsd_${time_now}"
+  echo "scanz_${time_now}"
 }
 
 get_concat_file_location() {
@@ -101,20 +101,23 @@ concatenate_files() {
   local output_name="$1"
 
   cat \
-    _src/messages/logs.bash \
     _src/messages/errors.bash \
+    _src/messages/logs.bash \
     _src/messages/help.bash \
     _src/utils/fs.bash \
     _src/utils/time.bash \
     _src/utils/modes.bash \
     _src/utils/constants.bash \
     _src/input/user_select.bash \
+    _src/args/crop_args.bash \
+    _src/args/doc_args.bash \
     _src/args/help_args.bash \
     _src/args/mode_args.bash \
-    _src/args/preview_args.bash \
     _src/args/photo_args.bash \
-    _src/args/document_args.bash \
-    _src/modes/document_mode.bash \
+    _src/args/preview_args.bash \
+    _src/args/verbose_args.bash \
+    _src/modes/crop_mode.bash \
+    _src/modes/doc_mode.bash \
     _src/modes/photo_mode.bash \
     _src/main.bash \
       >> `get_concat_file_location "$output_name"`
