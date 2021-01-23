@@ -5,13 +5,13 @@
 # Description   : Interprets command arguments for photo mode
 #----------------
 
-source "./input/user_select.bash"
+source "./_src/input/user_select.bash"
 
 read_photo_args() {
   [[ "$VERBOSE" = true ]] && log_arguments "${FUNCNAME[0]}" "$@"
   local i=0
 
-  while [ "$1" != "" ]; do
+  while [[ "$1" != "" ]]; do
     case $1 in
 
       -i | --scanner )
@@ -24,8 +24,8 @@ read_photo_args() {
         local quality="$1"
         ;;
 
-      -bw | --grayscale )
-        local bw_color_mode="true"
+      -g | --grayscale )
+        local gray_color_mode="true"
         ;;
 
       -d | --output_dir )
@@ -46,8 +46,8 @@ read_photo_args() {
   [[ -z "$quality" ]] && local quality=`default_photo_quality`
   [[ -z "$output_dir" ]] && local output_dir=`default_output_dir`
   [[ -z "$output_name" ]] && local output_name=`default_file_name`
-  [[ "$bw_color_mode" = "true" ]] \
-    && local color_mode=`color_mode_bw` \
+  [[ "$gray_color_mode" = "true" ]] \
+    && local color_mode=`color_mode_gray` \
     || local color_mode=`color_mode_color`
 
   echo "$scanner" "$color_mode" "$quality" "$output_dir" "$output_name"

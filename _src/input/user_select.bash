@@ -1,15 +1,12 @@
 #!/bin/bash
 
 #----------------
-# Name          : 
-# Description   : 
-# Author        : E Fournier
-# Dependencies  : 
-# Arguments     : 
-# Example Usage : 
+# Name          : user_select.bash
+# Project       : scanz
+# Description   : Collect user input via select menus
 #----------------
 
-source ./utils/constants.bash
+source "./_src/utils/constants.bash"
 
 user_select_scanner() {
   scanner="$1"

@@ -1,43 +1,86 @@
 #!/bin/bash
 
-source ./utils/fs.bash
+#----------------
+# Name          : fs_tests.bash
+# Project       : scanz
+# Description   : Unit tests for file-system functions
+#----------------
 
-when_getting_temp_tiff_dir_and_output_name_is_supplied() {
-  local message="It should return properly fomatted dir name"
-  local output_name="MyScan"
-  local expected_result="scan_${output_name}"
+source "./_src/utils/fs.bash"
+source "./_src/utils/time.bash"
 
-  local result=`get_temp_tiff_dir "${output_name}"`
+test_default_output_dir() {
+  local message="It should return the default output directory name."
+  local output_name="$(pwd)"
+  local expected_result=`default_output_dir`
 
-  assertEquals "${message}" "${expected_result}" "${result}"
+  local result=`default_output_dir`
+
+  assertEquals "$message" "$expected_result" "$result"
 }
 
-when_getting_temp_tiff_dir_and_output_name_is_not_supplied() {
-  local message="It should return a RequiredArguments error"
-  local expected_result="ERROR: Required argument(s) missing from get_temp_tiff_dir"
-  local result=`get_temp_tiff_dir`
+test_default_config_dir() {
+  local message="It should return the config directory name."
+  local expected_result="$HOME/.scanz"
 
-  assertEquals "${message}" "${expected_result}" "${result}"
+  local result=`config_dir`
+
+  assertEquals "$message" "$expected_result" "$result"
 }
 
-when_getting_temp_tiff_concat_file_and_sequence_name_is_supplied() {
-  local message="It should return properly fomatted file name"
-  local temp_sequence_name="MyScan"
-  local expected_result="scan_${output_name}"
+test_default_file_name() {
+  local message="It should return the default file name."
+  local expected_result="`get_time_now`"
 
-  local result=`get_temp_tiff_dir "${output_name}"`
+  local result=`default_file_name`
 
-  assertEquals "${message}" "${expected_result}" "${result}"
+  assertEquals "$message" "$expected_result" "$result"
 }
 
-when_getting_temp_tiff_dir_and_output_name_is_not_supplied() {
-  local message="It should return properly fomatted dir name"
-  local expected_result="ERROR: Required argument(s) missing from get_temp_tiff_dir"
-  local result=`get_temp_tiff_dir`
+test_tiff_dir_name() {
+  local message="It should return the tiff directory name."
+  local expected_result="_TIFs"
 
-  assertEquals "${message}" "${expected_result}" "${result}"
+  local result=`tiff_dir_name`
+
+  assertEquals "$message" "$expected_result" "$result"
 }
 
-suite_addTest when_getting_temp_tiff_dir_and_output_name_is_supplied
-suite_addTest when_getting_temp_tiff_dir_and_output_name_is_not_supplied
+test_get_tiff_page_name() {
+  local message="It should return the name of the tiff page with the supplied page number."
+  local expected_result="page_009.tif"
+
+  local result=`get_tiff_page_name "9"`
+
+  assertEquals "$message" "$expected_result" "$result"
+}
+
+test_get_tiff_concat_file() {
+  local message="It should return the name of the tiff concat file based on the supplied output name."
+  local expected_result="_concat_test.tif"
+
+  local result=`get_tiff_concat_file "test"`
+
+  assertEquals "$message" "$expected_result" "$result"
+}
+
+test_get_pdf_concat_file() {
+  local message="It should return the name of the pdf concat file based on the supplied output name."
+  local expected_result="_concat_test.pdf"
+
+  local result=`get_pdf_concat_file "test"`
+
+  assertEquals "$message" "$expected_result" "$result"
+}
+
+test_get_final_pdf_file() {
+  local message="It should return the name of the final pdf file based on the supplied output name."
+  local expected_result="test.pdf"
+
+  local result=`get_pdf_final_file "test"`
+
+  assertEquals "$message" "$expected_result" "$result"
+}
+
+. ./bin/shunit2
 

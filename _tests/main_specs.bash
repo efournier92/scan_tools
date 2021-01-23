@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source ./scan-to-file.bash
+source "./_src/scan-to-file.bash"
 
 setUp() {
   unset -f get_presets

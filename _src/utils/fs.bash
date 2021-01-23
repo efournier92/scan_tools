@@ -9,7 +9,7 @@
 # Example Usage : 
 #----------------
 
-source ./utils/time.bash
+source "./_src/utils/time.bash"
 
 default_output_dir() {
   echo "$(pwd)"
@@ -29,8 +29,10 @@ tiff_dir_name() {
 
 get_tiff_page_name() {
   local page_number="$1"
-  
-  echo "page_${page_number}.tif"
+
+  printf -v page_number_padded "%03d" "$page_number"
+
+  echo "page_${page_number_padded}.tif"
 }
 
 get_tiff_concat_file() {

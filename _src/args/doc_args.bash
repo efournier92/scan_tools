@@ -5,18 +5,17 @@
 # Description   : Interprets command arguments for doc mode
 #----------------
 
-source "./input/user_select.bash"
-source "./utils/constants.bash"
-source "./utils/fs.bash"
-source "./utils/time.bash"
-source "./messages/logs.bash"
-source "./messages/errors.bash"
+source "./_src/input/user_select.bash"
+source "./_src/utils/constants.bash"
+source "./_src/utils/fs.bash"
+source "./_src/utils/time.bash"
+source "./_src/messages/logs.bash"
+source "./_src/messages/errors.bash"
 
 read_doc_args() {
   [[ "$VERBOSE" = true ]] && log_arguments "${FUNCNAME[0]}" "$@"
-  local i=0
 
-  while [ "$1" != "" ]; do
+  while [[ "$1" != "" ]]; do
     case $1 in
 
       -i | --scanner )
@@ -26,7 +25,7 @@ read_doc_args() {
 
       -q | --quality )
         shift
-        local codec="$1"
+        local quality="$1"
         ;;
 
       -d | --output_dir )
@@ -39,7 +38,7 @@ read_doc_args() {
         local output_name="$1"
         ;;
 
-      -bw | --grayscale )
+      -g | --grayscale )
         local bw_color_mode="true"
         ;;
 
@@ -52,7 +51,7 @@ read_doc_args() {
   [[ -z "$output_dir" ]] && local output_dir=`default_output_dir`
   [[ -z "$output_name" ]] && local output_name=`default_file_name`
   [[ "$bw_color_mode" = "true" ]] \
-    && local color_mode=`color_mode_bw` \
+    && local color_mode=`color_mode_gray` \
     || local color_mode=`color_mode_color`
 
   echo "$scanner" "$color_mode" "$quality" "$output_dir" "$output_name"

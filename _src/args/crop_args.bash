@@ -9,7 +9,7 @@ read_crop_args() {
   [[ "$VERBOSE" = true ]] && log_arguments "${FUNCNAME[0]}" "$@"
   local i=0
 
-  while [ "$1" != "" ]; do
+  while [[ "$1" != "" ]]; do
     case $1 in
 
       -i | --input_dir )

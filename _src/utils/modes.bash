@@ -5,8 +5,8 @@
 # Description   : Utility functions for mode detection
 #----------------
 
-source ./utils/constants.bash
-source ./messages/errors.bash
+source "./_src/utils/constants.bash"
+source "./_src/messages/errors.bash"
 
 is_mode_known() {
   local selected_mode="$1"

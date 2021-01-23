@@ -1,0 +1,789 @@
+#!/bin/bash
+
+error_missing_function_args() {
+  echo "ERROR: Arguments missing from called function [$@]"
+  exit
+}
+error_missing_required_arg() {
+  echo "ERROR: required argument not found [$@]"
+  exit
+}
+error_file_not_found() {
+  echo "ERROR: input file not found [$@]"
+  exit
+}
+error_dir_not_found() {
+  echo "ERROR: directory not found [$@]"
+  exit
+}
+error_device_not_found() {
+  echo "ERROR: Device not found in function [$@]"
+  exit
+}
+error_mode_not_found() {
+  echo "ERROR: Mode not found [$@]"
+  exit
+}
+error_pdf_file_not_found() {
+  echo "ERROR: PDF file not found [$@]"
+  exit
+}
+log_arguments() {
+  echo "FUNCTION: $@" >&2
+}
+help_header() {
+cat << EOF
+_____
+SCANZ
+EOF
+}
+help_general() {
+cat << EOF
+_______
+GENERAL
+  -h, --help [mode]    print help information [for mode]
+  -m, --mode           enable mode [capture|cut|batch|join]
+  -v, --verbose        enable verbose debugging info
+  -p, --preview        enable preview after scan
+  
+  USAGE: scan_tools -m capture -h -v -p
+EOF
+}
+help_photo() {
+cat << EOF
+_____
+PHOTO
+  -i, --scanner        scanner device for input
+  -f, --format         format for scan
+  -q, --quality        scan qualiter [150, 300, 600]
+  -d, --output_dir     directory in which to save the capture
+  -o, --output_name    name for the scanned file
+  USAGE: scan_tools -m photo -i scanner -q 600 -f jpeg -d . -o scan
+EOF
+}
+help_doc() {
+cat << EOF
+___
+DOC
+  -i, --scanner        scanner device for input
+  -q, --quality        scan qualiter [150, 300, 600]
+  -d, --output_dir     directory in which to save the capture
+  -o, --output_name    name for the scanned file
+  
+  USAGE: scan_tools -m doc -i scanner -q 300 -d . -o scan
+EOF
+}
+help_crop() {
+cat << EOF
+____
+CROP
+  -i, --input_dir       scanner device for input
+  USAGE: scan_tools -m crop -i input_dir
+EOF
+}
+help_split_doc() {
+cat << EOF
+_________
+SPLIT DOC
+  -i, --doc, --pdf      scanner device for input
+  -d, --jpeg_dir        scanner device for input
+  USAGE: scan_tools -m split_doc -i pdf_file -d jpeg_dir
+EOF
+}
+help_join_doc() {
+cat << EOF
+________
+JOIN DOC
+  -i, -d,
+  --jpeg_dir            scanner device for input
+  USAGE: scan_tools -m join_doc -i jpeg_dir
+EOF
+}
+print_help_photo() {
+  help_header
+  help_photo
+}
+print_help_doc() {
+  help_header
+  help_doc
+}
+print_help_crop() {
+  help_header
+  help_crop
+}
+print_help_split_doc() {
+  help_header
+  help_split_doc
+}
+print_help_join_doc() {
+  help_header
+  help_join_doc
+}
+print_help_all() {
+  help_header
+  help_general
+  help_photo
+  help_doc
+  help_crop
+  help_split_doc
+  help_join_doc
+}
+print_help_by_mode() {
+  local mode="$1"
+  
+  if [[ "$mode" == `photo_mode_name` ]]; then
+    print_help_photo
+  elif [[ "$mode" == `doc_mode_name` ]]; then
+    print_help_doc
+  elif [[ "$mode" == `crop_mode_name` ]]; then
+    print_help_crop
+  elif [[ "$mode" == `split_doc_mode_name` ]]; then
+    print_help_split_doc
+  elif [[ "$mode" == `join_doc_mode_name` ]]; then
+    print_help_join_doc
+  else
+    print_help_all
+  fi
+}
+default_output_dir() {
+  echo "$(pwd)"
+}
+config_dir() {
+  echo "$HOME/.scanz"
+}
+default_file_name() {
+  echo "`get_time_now`"
+}
+tiff_dir_name() {
+  echo "_TIFs"
+}
+get_tiff_page_name() {
+  local page_number="$1"
+  printf -v page_number_padded "%03d" "$page_number"
+  echo "page_${page_number_padded}.tif"
+}
+get_tiff_concat_file() {
+  local output_name="$1"
+  
+  echo "_concat_$output_name.tif"
+}
+get_pdf_concat_file() {
+  local output_name="$1"
+  
+  echo "_concat_$output_name.pdf"
+}
+get_pdf_final_file() {
+  local output_name="$1"
+  
+  echo "$output_name.pdf"
+}
+get_time_now() {
+  echo $(date '+%y-%m-%d_%H%M%S')
+}
+is_mode_known() {
+  local selected_mode="$1"
+  [[ -z "$selected_mode" ]] && error_missing_function_args "${FUNCNAME[0]}" "$@"
+  local known_modes=(\
+    `photo_mode_name` \
+    `doc_mode_name` \
+    `crop_mode_name` \
+    `split_doc_mode_name` \
+    `join_doc_mode_name` \
+  )
+  
+  local is_known=false
+  for mode in "${known_modes[@]}"; do
+    [[ "$selected_mode" == "$mode" ]] && is_known=true
+  done
+  
+  echo "$is_known"
+}
+doc_mode_name() {
+  echo "doc"
+}
+photo_mode_name() {
+  echo "photo"
+}
+crop_mode_name() {
+  echo "crop"
+}
+split_doc_mode_name() {
+  echo "split_doc"
+}
+join_doc_mode_name() {
+  echo "join_doc"
+}
+color_mode_color() {
+  echo "color"
+}
+color_mode_gray() {
+  echo "gray"
+}
+default_color_mode() {
+  echo `color_mode_color`
+}
+default_photo_format() {
+  echo "jpeg"
+}
+default_photo_quality() {
+  echo "600"
+}
+default_doc_quality() {
+  echo "300"
+}
+selectable_formats() {
+  echo "pdf jpeg"
+}
+selectable_qualities() {
+  echo "600 300 150 75"
+}
+crop_jpeg_dir() {
+  echo "_JPEGs"
+}
+crop_pdf_dir() {
+  echo "_PDFs"
+}
+user_select_scanner() {
+  scanner="$1"
+  select selected_scanner in `scanimage -f "%d %n"`; do
+    scanner="$selected_scanner"
+    break
+  done
+  echo "$scanner"
+}
+user_select_pdf_file() {
+  read -p "PDF File: " pdf_file
+  echo "$pdf_file"
+}
+read_crop_args() {
+  [[ "$VERBOSE" = true ]] && log_arguments "${FUNCNAME[0]}" "$@"
+  local i=0
+  while [[ "$1" != "" ]]; do
+    case $1 in
+      -i | --input_dir )
+        shift
+        local input_dir="$1"
+        ;;
+    esac
+    shift
+  done
+  [[ -z "$input_dir" ]] && local input_dir=`default_input_dir`
+  echo "$input_dir"
+}
+read_doc_args() {
+  [[ "$VERBOSE" = true ]] && log_arguments "${FUNCNAME[0]}" "$@"
+  while [[ "$1" != "" ]]; do
+    case $1 in
+      -i | --scanner )
+        shift
+        local scanner="$1"
+        ;;
+      -q | --quality )
+        shift
+        local quality="$1"
+        ;;
+      -d | --output_dir )
+        shift
+        local output_dir="$1"
+        ;;
+      -o | --output_name )
+        shift
+        local output_name="$1"
+        ;;
+      -g | --grayscale )
+        local bw_color_mode="true"
+        ;;
+    esac
+    shift
+  done
+  
+  [[ -z "$scanner" ]] && local scanner=`user_select_scanner`
+  [[ -z "$quality" ]] && local quality=`default_doc_quality`
+  [[ -z "$output_dir" ]] && local output_dir=`default_output_dir`
+  [[ -z "$output_name" ]] && local output_name=`default_file_name`
+  [[ "$bw_color_mode" = "true" ]] \
+    && local color_mode=`color_mode_gray` \
+    || local color_mode=`color_mode_color`
+  echo "$scanner" "$color_mode" "$quality" "$output_dir" "$output_name"
+}
+read_help_args() {
+  [[ "$VERBOSE" = true ]] && log_arguments "${FUNCNAME[0]}" "$@"
+  while [[ "$1" != "" ]]; do
+    case $1 in
+      -h | --help )
+        local should_show_help=true
+        ;;
+      -m | --mode )
+        shift
+        local mode=$1
+        ;;
+    esac
+    shift
+  done
+ 
+  if [[ "$should_show_help" == true ]]; then
+    print_help_by_mode "$mode"
+    exit
+  fi
+}
+read_mode_args() {
+  [[ "$VERBOSE" = true ]] && log_arguments "${FUNCNAME[0]}" "$@"
+  
+  while [[ "$1" != "" ]]; do
+    case $1 in
+      -m | --mode )
+        shift
+        local mode="$1"
+        ;;
+    esac
+    shift
+  done
+ 
+  [[ -z "$mode" ]] && error_missing_required_arg "mode" "${FUNCNAME[0]}"
+  [[ `is_mode_known "$mode"` == false ]] && error_mode_not_found "$mode" "${FUNCNAME[0]}"
+  echo "$mode"
+}
+read_photo_args() {
+  [[ "$VERBOSE" = true ]] && log_arguments "${FUNCNAME[0]}" "$@"
+  local i=0
+  while [[ "$1" != "" ]]; do
+    case $1 in
+      -i | --scanner )
+        shift
+        local scanner="$1"
+        ;;
+      -q | --quality )
+        shift
+        local quality="$1"
+        ;;
+      -g | --grayscale )
+        local gray_color_mode="true"
+        ;;
+      -d | --output_dir )
+        shift
+        local output_dir="$1"
+        ;;
+      -o | --output_name )
+        shift
+        local output_name="$1"
+        ;;
+    esac
+    shift
+  done
+  [[ -z "$scanner" ]] && local scanner=`user_select_scanner`
+  [[ -z "$quality" ]] && local quality=`default_photo_quality`
+  [[ -z "$output_dir" ]] && local output_dir=`default_output_dir`
+  [[ -z "$output_name" ]] && local output_name=`default_file_name`
+  [[ "$gray_color_mode" = "true" ]] \
+    && local color_mode=`color_mode_gray` \
+    || local color_mode=`color_mode_color`
+  echo "$scanner" "$color_mode" "$quality" "$output_dir" "$output_name"
+}
+read_preview_args() {
+  [[ "$VERBOSE" = true ]] && log_arguments "${FUNCNAME[0]}" "$@"
+  while [[ "$1" != "" ]]; do
+    case $1 in
+      -p | --preview )
+        local is_preview_enabled="true"
+        ;;
+    esac
+    shift
+  done
+ 
+  [[ -z "$is_preview_enabled" ]] && local is_preview_enabled="false"
+  echo "$is_preview_enabled"
+}
+read_verbose_args() {
+  [[ "$is_verbose" = true ]] && log_arguments "${FUNCNAME[0]}" "$@"
+  while [[ "$1" != "" ]]; do
+    case $1 in
+      -v | --verbose )
+        local is_verbose="true"
+        ;;
+    esac
+    shift
+  done
+ 
+  [[ -z "$is_verbose" ]] && local is_verbose="false"
+  echo "$is_verbose"
+}
+read_split_doc_args() {
+  [[ "$VERBOSE" = true ]] && log_arguments "${FUNCNAME[0]}" "$@"
+  while [[ "$1" != "" ]]; do
+    case $1 in
+      -i | --doc | --pdf )
+        shift
+        local pdf_file="$1"
+        ;;
+      -d | --jpeg_dir )
+        shift
+        local jpeg_dir="$1"
+        ;;
+    esac
+    shift
+  done
+  echo "$pdf_file" "$jpeg_dir"
+}
+read_join_doc_args() {
+  [[ "$VERBOSE" = true ]] && log_arguments "${FUNCNAME[0]}" "$@"
+  while [[ "$1" != "" ]]; do
+    case $1 in
+      -i | -d | --jpeg_dir )
+        shift
+        local jpeg_dir="$1"
+        ;;
+    esac
+    shift
+  done
+  echo "$jpeg_dir"
+}
+create_jpegs_from_pdf() {
+  local pdf_dir="$1"
+  mkdir -p "$pdf_dir"
+  for file in *.pdf; do
+    local dir_name="${file%.*}"
+    local output_path="$jpeg_dir/$dir_name"
+    mkdir -p "$output_path"
+    [[ "$(ls -A $output_path)" ]] && continue
+    pdftoppm -jpeg -r 300 "$file" "$jpeg_dir/$dir_name/pg"
+  done
+}
+crop_jpegs_in_pdf_dir() {
+  file_names=""
+  for file in $image_directory/*.jpg; do
+    file_names="${file_names} ${file}"
+    gimp "$file"
+  done
+  echo "$file_names"
+} 
+print_cropped_pdf() {
+  local file_names="$1"
+  local pdf_name="$2"
+  convert "$file_names" "$pdf_name.pdf"
+}
+crop_all_jpegs() {
+  local jpeg_dir="$"
+  local pdf_dir="$"
+  local image_directory="$"
+  for image_directory in $jpeg_dir/*; do
+    pdf_name="$pdf_dir/${image_directory##*/}.pdf"
+    [[ -f "$pdf_name" ]] && continue
+    
+    local doc_file_names=`crop_jpegs_in_pdf_dir`
+    print_cropped_pdf "$doc_file_names" "$pdf_name"
+  done
+}
+crop_mode() {
+  local input_dir="$1"
+  local jpeg_dir=`crop_jpeg_dir`
+  local pdf_dir=`crop_pdf_dir`
+  create_jpegs_from_pdf 
+  crop_all_jpegs
+}
+get_create_tiff_dir_command() {
+  [[ "$VERBOSE" = true ]] && log_arguments "${FUNCNAME[0]}" "$@"
+  local tiff_dir="$1"
+  [[ -z "$tiff_dir" ]] && error_missing_function_args "${FUNCNAME[0]}" "$@"
+  echo "mkdir -p $tiff_dir"
+}
+get_scan_command() {
+  [[ "$VERBOSE" = true ]] && log_arguments "${FUNCNAME[0]}" "$@"
+  local scanner="$1"
+  local color_mode="$2"
+  local quality="$3"
+  local tiff_dir="$4"
+  local page_name="$5"
+  [[ -z "$scanner" || -z "$color_mode" || -z "$quality" || -z "$tiff_dir" || -z "$page_name" ]] && error_missing_function_args "${FUNCNAME[0]}" "$@"
+  echo "scanimage -d $scanner --progress --format=tiff --mode $color_mode --resolution $quality -o $tiff_dir/$page_name"
+}
+get_merge_tif_files_command() {
+  [[ "$VERBOSE" = true ]] && log_arguments "${FUNCNAME[0]}" "$@"
+  local tiff_dir="$1"
+  local tiff_concat_file="$2"
+  [[ -z "$tiff_dir" || -z "$tiff_concat_file" ]] \
+    && error_missing_function_args "${FUNCNAME[0]}" "$@"
+  echo "tiffcp $tiff_dir/*.tif $tiff_dir/$tiff_concat_file"
+}
+get_convert_tiff_to_pdf_command() {
+  [[ "$VERBOSE" = true ]] && log_arguments "${FUNCNAME[0]}" "$@"
+  local tiff_dir="$1"
+  local tiff_concat_file="$2"
+  local pdf_concat_file="$3"
+  [[ -z "$tiff_dir" || -z "$tiff_concat_file" || -z "$pdf_concat_file" ]] \
+    && error_missing_function_args "${FUNCNAME[0]}" "$@"
+  echo "tiff2pdf -o $tiff_dir/$pdf_concat_file $tiff_dir/$tiff_concat_file"
+}
+get_shrink_pdf_command() {
+  [[ "$VERBOSE" = true ]] && log_arguments "${FUNCNAME[0]}" "$@"
+  local tiff_dir="$1"
+  local tiff_concat_file="$2"
+  local output_dir="$3"
+  local pdf_concat_file="$4"
+  local pdf_final_file="$5"
+  [[ -z "$tiff_dir" || -z "$tiff_concat_file" || -z $output_dir || -z "$pdf_concat_file" || -z "$pdf_final_file" ]] && error_missing_function_args "${FUNCNAME[0]}" "$@"
+  echo "ps2pdf $tiff_dir/$pdf_concat_file $output_dir/$pdf_final_file"
+}
+get_batch_message() {
+  [[ "$VERBOSE" = true ]] && log_arguments "${FUNCNAME[0]}" "$@"
+  local page_number="$1"
+  if [[ $page_number -le 0 ]]; then
+    local message="\nStart [enter] >> "
+  else
+    local message="\n\nContinue/Preview/Delete/Quit [c/p/d/q] >> "
+  fi
+  echo "$message"
+}
+on_batch_quit() {
+  [[ "$VERBOSE" = true ]] && log_arguments "${FUNCNAME[0]}" "$@"
+  local page_number="stop"
+  echo $page_number
+}
+on_batch_preview() {
+  [[ "$VERBOSE" = true ]] && log_arguments "${FUNCNAME[0]}" "$@"
+  local tiff_dir="$1"
+  local page_number="$2"
+  local page_name=`get_tiff_page_name $page_number`
+  eval `get_show_doc_preview_command "$tiff_dir" "$page_name"`
+  echo $page_number
+}
+on_batch_delete() {
+  [[ "$VERBOSE" = true ]] && log_arguments "${FUNCNAME[0]}" "$@"
+  local tiff_dir="$1"
+  local page_number=$2
+  local page_name=`get_tiff_page_name $page_number`
+  eval `get_delete_tiff_command "$tiff_dir" "$page_name"`
+  local page_number=$(( page_number - 1 ))
+  echo $page_number
+}
+print_output() {
+  [[ "$VERBOSE" = true ]] && log_arguments "${FUNCNAME[0]}" "$@"
+  local message="$1"
+  printf "$message" >&2
+}
+on_batch_scan() {
+  [[ "$VERBOSE" = true ]] && log_arguments "${FUNCNAME[0]}" "$@"
+  local scanner="$1"
+  local color_mode="$2"
+  local quality="$3"
+  local tiff_dir="$4"
+  local page_number="$5"
+  
+  page_number=$(( page_number + 1 ))
+  local page_name=`get_tiff_page_name $page_number`
+  print_output "Scanning $tiff_dir/$page_name\n"
+  eval `get_scan_command "$scanner" "$color_mode" "$quality" "$tiff_dir" "$page_name"`
+  echo $page_number
+}
+get_batch_user_input() {
+  [[ "$VERBOSE" = true ]] && log_arguments "${FUNCNAME[0]}" "$@"
+  local message="$1"
+  print_output "$message"
+  read user_input
+  echo "$user_input"
+}
+run_batch_next_step() {
+  [[ "$VERBOSE" = true ]] && log_arguments "${FUNCNAME[0]}" "$@"
+  local scanner="$1"
+  local color_mode="$2"
+  local quality="$3"
+  local tiff_dir="$4"
+  local page_number="$5"
+  
+  [[ -z $page_number || $page_number -lt 0 ]] && local page_number=0
+  local message=`get_batch_message $page_number`
+  
+  local user_input=`get_batch_user_input "$message"`
+  local page_name=`get_tiff_page_name $page_number`
+  if [[ $user_input =~ "q" ]]; then
+    local page_number=`on_batch_quit`
+  elif [[ $user_input =~ "p" ]]; then
+    local page_number=`on_batch_preview "$tiff_dir" "$page_number"`
+  elif [[ $user_input =~ "d" ]]; then
+    local page_number=`on_batch_delete "$tiff_dir" "$page_number"`
+  else
+    local page_number=`on_batch_scan "$scanner" "$color_mode" "$quality" "$tiff_dir" "$page_number"`
+  fi
+  echo $page_number
+}
+batch_scan_to_tiffs() {
+  [[ "$VERBOSE" = true ]] && log_arguments "${FUNCNAME[0]}" "$@"
+  local scanner="$1"
+  local color_mode="$2"
+  local quality="$3"
+  local tiff_dir="$4"
+  until [[ "$page_number" == "stop" ]]; do
+    local page_number=`run_batch_next_step "$scanner" "$color_mode" "$quality" "$tiff_dir" $page_number`
+  done
+}
+scan_to_tiff() {
+  [[ "$VERBOSE" = true ]] && log_arguments "${FUNCNAME[0]}" "$@"
+  local scanner="$1"
+  local color_mode="$2"
+  local quality="$3"
+  local tiff_dir="$4"
+  eval `get_create_tiff_dir_command "$tiff_dir"`
+  batch_scan_to_tiffs "$scanner" "$color_mode" "$quality" "$tiff_dir"
+}
+print_final_pdf() {
+  [[ "$VERBOSE" = true ]] && log_arguments "${FUNCNAME[0]}" "$@"
+  local tiff_dir="$1"
+  local tiff_concat_file="$2"
+  local output_dir="$3"
+  local pdf_concat_file="$4"
+  local pdf_final_file="$5"
+  eval `get_merge_tif_files_command "$tiff_dir" "$tiff_concat_file"`
+  eval `get_convert_tiff_to_pdf_command "$tiff_dir" "$tiff_concat_file" "$pdf_concat_file"`
+  eval `get_shrink_pdf_command "$tiff_dir" "$tiff_concat_file" "$output_dir" "$pdf_concat_file" "$pdf_final_file"`
+}
+get_show_doc_preview_command() {
+  [[ "$VERBOSE" = true ]] && log_arguments "${FUNCNAME[0]}" "$@"
+  local output_dir="$1"
+  local file="$2"
+  [[ -z "$output_dir" || -z "$file" ]] && error_missing_function_args "${FUNCNAME[0]}" "$@"
+  echo "evince $output_dir/$file &> /dev/null"
+}
+get_delete_tiff_command() {
+  [[ "$VERBOSE" = true ]] && log_arguments "${FUNCNAME[0]}" "$@"
+  local output_dir="$1"
+  local file="$2"
+  [[ -z "$output_dir" || -z "$file" ]] && error_missing_function_args "${FUNCNAME[0]}" "$@"
+  echo "rm $output_dir/$file"
+}
+try_preview_scanned_file() {
+  [[ "$VERBOSE" = true ]] && log_arguments "${FUNCNAME[0]}" "$@"
+  local output_dir="$1"
+  local scanned_file="$2"
+  [[ "$PREVIEW" == "true" && -f "$output_dir/$scanned_file" ]] && eval `get_show_doc_preview_command "$output_dir" "$scanned_file"`
+}
+get_cleanup_tiff_dir_command() {
+  [[ "$VERBOSE" = true ]] && log_arguments "${FUNCNAME[0]}" "$@"
+  local tiff_dir="$1"
+  [[ -z "$tiff_dir" ]] && error_missing_function_args "${FUNCNAME[0]}" "$@"
+  echo "rm -r $tiff_dir"
+}
+doc_mode() {
+  [[ "$VERBOSE" = true ]] && log_arguments "${FUNCNAME[0]}" "$@"
+  local scanner="$1"
+  local color_mode="$2"
+  local quality="$3"
+  local output_dir="$4"
+  local output_name="$5"
+  [[ -z "$scanner" || -z "$quality" || -z "$output_dir" || -z "$output_name" ]] && error_missing_function_args "${FUNCNAME[0]}" "$@"
+  local tiff_dir="`config_dir`/`tiff_dir_name`/$output_name"
+  local tiff_concat_file=`get_tiff_concat_file "$output_name"`
+  local pdf_concat_file=`get_pdf_concat_file "$output_name"`
+  local pdf_final_file=`get_pdf_final_file "$output_name"`
+  scan_to_tiff "$scanner" "$color_mode" "$quality" "$tiff_dir"
+  print_final_pdf "$tiff_dir" "$tiff_concat_file" "$output_dir" "$pdf_concat_file" "$pdf_final_file"
+  try_preview_scanned_file "$output_dir" "$pdf_final_file"
+  eval `get_cleanup_tiff_dir_command "$tiff_dir"`
+}
+get_scan_photo_command() {
+  [[ "$VERBOSE" = true ]] && log_arguments "${FUNCNAME[0]}" "$@"
+  local scanner="$1"
+  local color_mode="$2"
+  local quality="$3"
+  local output_location="$4"
+  [[ -z "$scanner" || -z "$color_mode" || -z "$quality" || -z "$output_location" ]] && error_missing_function_args "${FUNCNAME[0]}" "$@"
+  echo "scanimage -d $scanner --progress --format=png --mode $color_mode --resolution $quality -o $output_location"
+}
+photo_mode() {
+  [[ "$VERBOSE" = true ]] && log_arguments "${FUNCNAME[0]}" "$@"
+  local scanner="$1"
+  local color_mode="$2"
+  local quality="$3"
+  local output_dir="$4"
+  local output_name="$5"
+  local output_location="$output_dir/$output_name.png"
+  [[ -z "$scanner" || -z "$color_mode" || -z "$quality" || -z "$output_dir" || -z "$output_name" ]] && error_missing_function_args "${FUNCNAME[0]}" "$@"
+  
+  eval `get_scan_photo_command "$scanner" "$color_mode" "$quality" "$output_location"`
+}
+get_jpeg_dir() {
+  local pdf_file="$1"
+  echo "${pdf_file%%.*}"
+}
+create_jpeg_dir() {
+  local pdf_file="$1"
+  local jpeg_dir=`get_jpeg_dir "$pdf_file"`
+  mkdir -p "$(pwd)/$jpeg_dir"
+}
+get_split_doc_command() {
+  local pdf_file="$1"
+  [[ -z "$pdf_file" ]] && error_missing_function_args "${FUNCNAME[0]} $@"
+  [[ ! -f $pdf_file ]] && error_pdf_file_not_found "$pdf_file"
+  local jpeg_dir=`get_jpeg_dir "$pdf_file"`
+  echo "pdftoppm -jpeg -r 300 $pdf_file $jpeg_dir/pg"
+}
+run_split_doc_command() {
+  local command="$1"
+  eval "$command"
+}
+split_doc_mode() {
+  local pdf_file="$1"
+  local command=`get_split_doc_command $@`
+  create_jpeg_dir "$pdf_file"
+  run_split_doc_command "$command"  
+}
+get_file_names() {
+  local jpeg_dir="$1"
+  file_names=""
+  for file in $jpeg_dir/*.jpg; do
+    file_names="${file_names} ${file}"
+  done
+  echo "$file_names"
+} 
+get_join_doc_command() {
+  local jpeg_dir="$1"
+  [[ -z "$jpeg_dir" ]] && error_missing_function_args "${FUNCNAME[0]}" "$@"
+  
+  local file_names=`get_file_names "$jpeg_dir"`
+  
+  echo "convert $file_names $jpeg_dir.pdf"
+}
+run_join_doc_command() {
+  local command="$1"
+  eval "$command"
+}
+join_doc_mode() {
+  local join_doc_command=`get_join_doc_command "$@"`
+  run_join_doc_command "$join_doc_command"
+}
+run_photo_mode() {
+  photo_mode `read_photo_args "$@"`
+}
+run_doc_mode() {
+  doc_mode `read_doc_args "$@"`
+}
+run_crop_mode() {
+  crop_mode `read_crop_args "$@"`
+}
+run_split_doc_mode() {
+  split_doc_mode `read_split_doc_args "$@"`
+}
+run_join_doc_mode() {
+  join_doc_mode `read_join_doc_args "$@"`
+}
+main() {
+  local is_verbose_enabled=`read_verbose_args "$@"`
+  [[ "$is_verbose_enabled" == true ]] && VERBOSE=true
+  local is_preview_enabled=`read_preview_args "$@"`
+  [[ "$is_preview_enabled" == true ]] && PREVIEW=true
+  
+  local mode=`read_mode_args "$@"`
+  read_help_args "$@"
+  if [[ "$mode" == `photo_mode_name` ]]; then
+    run_photo_mode "$@"
+  elif [[ "$mode" == `doc_mode_name` ]]; then
+    run_doc_mode "$@"
+  elif [[ "$mode" == `crop_mode_name` ]]; then
+    run_crop_mode "$@"
+  elif [[ "$mode" == `split_doc_mode_name` ]]; then
+    run_split_doc_mode "$@"
+  elif [[ "$mode" == `join_doc_mode_name` ]]; then
+    run_join_doc_mode "$@"
+  else
+    print_help_by_mode "$mode"
+  fi
+}
+main "$@"

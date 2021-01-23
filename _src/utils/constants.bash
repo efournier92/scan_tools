@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source ./utils/time.bash
+source "./_src/utils/time.bash"
 
 doc_mode_name() {
   echo "doc"
@@ -23,11 +23,11 @@ join_doc_mode_name() {
 }
 
 color_mode_color() {
-  echo "Color"
+  echo "color"
 }
 
-color_mode_bw() {
-  echo "Gray"
+color_mode_gray() {
+  echo "gray"
 }
 
 default_color_mode() {

@@ -7,20 +7,20 @@
 # Dependencies  : 
 #----------------
 
-source ./messages/help.bash
-source ./utils/constants.bash
-source ./args/mode_args.bash
-source ./args/verbose_args.bash
-source ./args/preview_args.bash
-source ./args/help_args.bash
-source ./args/photo_args.bash
-source ./args/doc_args.bash
-source ./args/split_doc_args.bash
-source ./args/join_doc_args.bash
-source ./modes/photo_mode.bash
-source ./modes/doc_mode.bash
-source ./modes/split_doc_mode.bash
-source ./modes/join_doc_mode.bash
+source "./_src/messages/help.bash"
+source "./_src/utils/constants.bash"
+source "./_src/args/mode_args.bash"
+source "./_src/args/verbose_args.bash"
+source "./_src/args/preview_args.bash"
+source "./_src/args/help_args.bash"
+source "./_src/args/photo_args.bash"
+source "./_src/args/doc_args.bash"
+source "./_src/args/split_doc_args.bash"
+source "./_src/args/join_doc_args.bash"
+source "./_src/modes/photo_mode.bash"
+source "./_src/modes/doc_mode.bash"
+source "./_src/modes/split_doc_mode.bash"
+source "./_src/modes/join_doc_mode.bash"
 
 run_photo_mode() {
   photo_mode `read_photo_args "$@"`

@@ -1,12 +1,9 @@
 #!/bin/bash
 
 #----------------
-# Name          : 
-# Description   : 
-# Author        : E Fournier
-# Dependencies  : 
-# Arguments     : 
-# Example Usage : 
+# Name          : join_doc_mode.bash
+# Project       : scanz
+# Description   : Run process join a directory of jpegs to a pdf
 #----------------
 
 get_file_names() {
@@ -20,13 +17,25 @@ get_file_names() {
   echo "$file_names"
 } 
 
-join_doc_mode() {
+get_join_doc_command() {
   local jpeg_dir="$1"
 
   [[ -z "$jpeg_dir" ]] && error_missing_function_args "${FUNCNAME[0]}" "$@"
   
   local file_names=`get_file_names "$jpeg_dir"`
   
-  convert "$file_names" "$jpeg_dir.pdf"
+  echo "convert $file_names $jpeg_dir.pdf"
+}
+
+run_join_doc_command() {
+  local command="$1"
+
+  eval "$command"
+}
+
+join_doc_mode() {
+  local join_doc_command=`get_join_doc_command "$@"`
+
+  run_join_doc_command "$join_doc_command"
 }
 

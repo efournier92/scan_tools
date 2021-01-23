@@ -5,15 +5,14 @@
 # Description   : Interprets command arguments for doc mode
 #----------------
 
-source "./input/user_select.bash"
-source "./messages/help.bash"
-source "./utils/constants.bash"
+source "./_src/input/user_select.bash"
+source "./_src/messages/help.bash"
+source "./_src/utils/constants.bash"
 
 read_join_doc_args() {
   [[ "$VERBOSE" = true ]] && log_arguments "${FUNCNAME[0]}" "$@"
-  local i=0
 
-  while [ "$1" != "" ]; do
+  while [[ "$1" != "" ]]; do
     case $1 in
 
       -i | -d | --jpeg_dir )

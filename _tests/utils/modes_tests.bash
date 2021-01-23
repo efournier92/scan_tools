@@ -1,49 +1,84 @@
 #!/bin/bash
 
-source ./utils/modes.bash
-source ./constants/constants.bash
+#----------------
+# Name          : modes_tests.bash
+# Project       : scanz
+# Description   : Unit tests for mode functions
+#----------------
 
-when_detecting_image_mode_and_format_is_pdf() {
-  local message="It should"
-  local format="pdf"
-  local expected_result=`document_mode_name`
+source "./_src/utils/modes.bash"
+source "./_src/utils/constants.bash"
+source "./_src/messages/errors.bash"
 
-  local result=`detect_image_mode ${format}`
+test_is_mode_known_and_no_mode_is_supplied() {
+  local message="It should throw a missing-function-args error."
+  local expected_result=`error_missing_function_args "is_mode_known"`
 
-  assertEquals "${message}" "${expected_result}" "${result}"
+  local result=`is_mode_known`
+
+  assertEquals "$message" "$expected_result" "$result"
 }
 
-when_detecting_image_mode_and_format_is_jpeg() {
-  local message="It should"
-  local format="jpeg"
-  local expected_result=`photo_mode_name`
+test_is_mode_known_and_an_unknown_mode_is_supplied() {
+  local message="It should return false"
+  local mode="fake_mode"
+  local expected_result="false"
 
-  local result=`detect_image_mode ${format}`
+  local result=`is_mode_known $mode`
 
-  assertEquals "${message}" "${expected_result}" "${result}"
+  assertEquals "$message" "$expected_result" "$result"
 }
 
-when_detecting_image_mode_and_unrecognized_format_is_supplied() {
-  local message="It should"
-  local format="lol"
-  local expected_result=`message_image_mode_not_detected`
+test_is_mode_known_and_photo_mode_name_is_supplied() {
+  local message="It should return true"
+  local mode=`photo_mode_name`
+  local expected_result="true"
 
-  local result=`detect_image_mode ${format}`
+  local result=`is_mode_known $mode`
 
-  assertEquals "${message}" "${expected_result}" "${result}"
+  assertEquals "$message" "$expected_result" "$result"
 }
 
-when_detecting_image_mode_and_no_arguments_are_supplied() {
-  local message="It should"
-  local expected_result=`message_image_mode_not_detected`
+test_is_mode_known_and_doc_mode_name_is_supplied() {
+  local message="It should return true"
+  local mode=`doc_mode_name`
+  local expected_result="true"
 
-  local result=`detect_image_mode`
+  local result=`is_mode_known $mode`
 
-  assertEquals "${message}" "${expected_result}" "${result}"
+  assertEquals "$message" "$expected_result" "$result"
 }
 
-suite_addTest when_detecting_image_mode_and_format_is_pdf
-suite_addTest when_detecting_image_mode_and_format_is_jpeg
-suite_addTest when_detecting_image_mode_and_unrecognized_format_is_supplied
-suite_addTest when_detecting_image_mode_and_no_arguments_are_supplied
+
+test_is_mode_known_and_crop_mode_name_is_supplied() {
+  local message="It should return true"
+  local mode=`crop_mode_name`
+  local expected_result="true"
+
+  local result=`is_mode_known $mode`
+
+  assertEquals "$message" "$expected_result" "$result"
+}
+
+test_is_mode_known_and_split_doc_mode_name_is_supplied() {
+  local message="It should return true"
+  local mode=`split_doc_mode_name`
+  local expected_result="true"
+
+  local result=`is_mode_known $mode`
+
+  assertEquals "$message" "$expected_result" "$result"
+}
+
+test_is_mode_known_and_join_doc_mode_name_is_supplied() {
+  local message="It should return true"
+  local mode=`join_doc_mode_name`
+  local expected_result="true"
+
+  local result=`is_mode_known $mode`
+
+  assertEquals "$message" "$expected_result" "$result"
+}
+
+. ./bin/shunit2
 

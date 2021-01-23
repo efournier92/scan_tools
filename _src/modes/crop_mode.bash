@@ -1,12 +1,9 @@
 #!/bin/bash
 
 #----------------
-# Name          : 
-# Description   : 
-# Author        : E Fournier
-# Dependencies  : 
-# Arguments     : 
-# Example Usage : 
+# Name          : crop_mode.bash
+# Project       : scanz
+# Description   : Functions to facilitate crop-mode functionality
 #----------------
 
 create_jpegs_from_pdf() {
