@@ -26,7 +26,7 @@ GENERAL
 
   -p, --preview        enable preview after scan
   
-  USAGE: scan_tools -m capture -h -v -p
+  USAGE: scanz -m capture -h -v -p
 
 EOF
 }
@@ -46,7 +46,7 @@ PHOTO
 
   -o, --output_name    name for the scanned file
 
-  USAGE: scan_tools -m photo -i scanner -q 600 -f jpeg -d . -o scan
+  USAGE: scanz -m photo -i scanner -q 600 -f jpeg -d . -o scan
 
 EOF
 }
@@ -64,7 +64,7 @@ DOC
 
   -o, --output_name    name for the scanned file
   
-  USAGE: scan_tools -m doc -i scanner -q 300 -d . -o scan
+  USAGE: scanz -m doc -i scanner -q 300 -d . -o scan
 
 EOF
 }
@@ -76,7 +76,7 @@ CROP
 
   -i, --input_dir       scanner device for input
 
-  USAGE: scan_tools -m crop -i input_dir
+  USAGE: scanz -m crop -i input_dir
 
 EOF
 }
@@ -90,7 +90,7 @@ SPLIT DOC
 
   -d, --jpeg_dir        scanner device for input
 
-  USAGE: scan_tools -m split_doc -i pdf_file -d jpeg_dir
+  USAGE: scanz -m split_doc -i pdf_file -d jpeg_dir
 
 EOF
 }
@@ -103,7 +103,7 @@ JOIN DOC
   -i, -d,
   --jpeg_dir            scanner device for input
 
-  USAGE: scan_tools -m join_doc -i jpeg_dir
+  USAGE: scanz -m join_doc -i jpeg_dir
 
 EOF
 }
