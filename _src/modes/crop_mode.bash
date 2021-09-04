@@ -8,19 +8,20 @@
 
 create_jpegs_from_pdf() {
   [[ "$VERBOSE" = true ]] && log_arguments "${FUNCNAME[0]}" "$@"
-  local pdf_dir="$1"
+  local input_dir="$1"
+  local pdf_dir="$2"
 
-  mkdir -p "$pdf_dir"
+  mkdir -p "$input_dir/$pdf_dir"
 
-  for file in *.pdf; do
+  for file in $input_dir/*.pdf; do
     local dir_name="${file%.*}"
-    local output_path="$jpeg_dir/$dir_name"
+    local output_path="$input_dir/$jpeg_dir/$dir_name"
 
     mkdir -p "$output_path"
 
     [[ "$(ls -A $output_path)" ]] && continue
 
-    pdftoppm -jpeg -r 300 "$file" "$jpeg_dir/$dir_name/pg"
+    pdftoppm -jpeg -r 300 "$file" "$output_path/pg"
   done
 }
 
@@ -66,8 +67,8 @@ crop_mode() {
   local input_dir="$1"
   local jpeg_dir=`crop_jpeg_dir`
   local pdf_dir=`crop_pdf_dir`
-
-  create_jpegs_from_pdf "$pdf_dir"
-  crop_all_jpegs "$jpeg_dir" "$pdf_dir"
+  
+  create_jpegs_from_pdf "$input_dir" "$pdf_dir"
+  crop_all_jpegs "$input_dir" "$jpeg_dir" "$pdf_dir"
 }
 
